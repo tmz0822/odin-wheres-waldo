@@ -1,0 +1,40 @@
+.dropdown-menu {
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(33, 33, 33, 0.4);
+  list-style: none;
+  padding: 0;
+  gap: 0.1rem;
+
+  position: absolute;
+
+  cursor: pointer;
+}
+
+.visible {
+  display: block;
+}
+
+.hidden {
+  display: none;
+}
+
+.dropdown-menu > * {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0.5;
+}
+
+.dropdown-menu img {
+  width: 100%;
+  display: block;
+}
+
+.dropdown-menu > *:hover {
+  opacity: 1;
+}
+
