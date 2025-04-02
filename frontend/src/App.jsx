@@ -1,67 +1,36 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import Image from './components/Game';
 import './App.css';
-import imageUrl from './images/waldo2.jpg';
-import ClickBox from './components/ClickBox';
-import DropdownMenu from './components/DropdownMenu';
+import axios from 'axios';
+import Marker from './components/Marker';
+import Game from './components/Game';
 
 function App() {
-  const [coordinates, setCoordinates] = useState({ x: 0, y: 0 });
-  const [clickBoxIsVisible, setClickBoxIsVisible] = useState(false);
-  const [menuIsVisible, setMenuIsVisible] = useState(false);
+  // Maybe fetch images?
+  const [images, setImages] = useState([]);
 
-  function handleClick(e) {}
+  useEffect(() => {
+    async function fetchImages() {
+      const response = await axios.get('http://localhost:3000/images');
 
-  function handleMouseDown(e) {
-    updateCoordinates(e);
+      if (response.data.success) {
+        setImages(response.data.images);
+      }
+    }
 
-    setClickBoxIsVisible(true);
+    fetchImages();
+  }, []);
 
-    setMenuIsVisible(!menuIsVisible);
+  if (images.length === 0) {
+    return <p>No image found!</p>;
   }
-
-  function handleMouseUp(e) {
-    setClickBoxIsVisible(false);
-  }
-
-  function updateCoordinates(e) {
-    const image = e.target;
-    const rect = image.getBoundingClientRect();
-
-    // Get mouse click relative to the image on screen
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    setCoordinates({ x, y });
-  }
-
-  console.log(`Coordinates, ${coordinates.x}, ${coordinates.y}`);
 
   return (
-    <div className="image-container">
-      <img
-        src={imageUrl}
-        alt=""
-        onClick={handleClick}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        draggable="false"
-      />
-
-      {clickBoxIsVisible && (
-        <ClickBox
-          x={coordinates.x}
-          y={coordinates.y}
-          isVisible={clickBoxIsVisible}
-        />
-      )}
-
-      <DropdownMenu
-        x={coordinates.x}
-        y={coordinates.y}
-        isVisible={menuIsVisible}
-        baseFileName="waldo2"
-      />
-    </div>
+    <>
+      {images.map((image) => (
+        <Game key={image.id} image={image} />
+      ))}
+    </>
   );
 }
 

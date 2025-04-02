@@ -1,3 +1,17 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+.image-container {
+  position: relative;
+}
+
 .dropdown-menu {
   width: 80px;
   display: flex;
@@ -8,7 +22,6 @@
   gap: 0.1rem;
 
   position: absolute;
-
   cursor: pointer;
 }
 
@@ -36,5 +49,11 @@
 
 .dropdown-menu > *:hover {
   opacity: 1;
+}
+
+.marker {
+  position: absolute;
+  font-size: 65px;
+  transform: translate(-50%, -50%);
 }
 
