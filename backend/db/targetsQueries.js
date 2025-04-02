@@ -1,18 +1,18 @@
 const prisma = require('../config/prisma');
 
-async function getTargetCoordinates(imageId, skip) {
+async function getTarget(imageId, skip) {
   try {
-    const coordinates = await prisma.target.findFirstOrThrow({
+    const target = await prisma.target.findFirstOrThrow({
       where: {
         imageId: Number(imageId),
       },
       skip: Number(skip),
     });
 
-    return coordinates;
+    return target;
   } catch (error) {
-    console.log('Get target coordinates failed: ', error);
+    console.log('Get target  failed: ', error);
   }
 }
 
-module.exports = { getTargetCoordinates };
+module.exports = { getTarget };

@@ -33,6 +33,7 @@ model GameSession {
   id        Int       @id @default(autoincrement())
   startTime DateTime  @default(now())
   endTime   DateTime?
+  found     Int       @default(0)
 
   image   Image @relation(fields: [imageId], references: [id])
   imageId Int

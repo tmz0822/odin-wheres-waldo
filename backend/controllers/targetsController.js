@@ -4,12 +4,9 @@ async function verifyTargets(req, res) {
   const imageId = req.params.imageId;
   const { targetIndex, coordinates } = req.body;
 
-  const targetCoordinates = await targetsQueries.getTargetCoordinates(
-    imageId,
-    targetIndex
-  );
+  const target = await targetsQueries.getTarget(imageId, targetIndex);
   console.log(coordinates);
-  console.log(targetCoordinates);
+  console.log(target);
   // Verify coordinates
   const acceptableOffset = 40;
 
@@ -17,12 +14,12 @@ async function verifyTargets(req, res) {
     isWithinTarget(
       coordinates.x,
       coordinates.y,
-      targetCoordinates.x,
-      targetCoordinates.y,
+      target.x,
+      target.y,
       acceptableOffset
     )
   ) {
-    res.json({ found: true });
+    res.json({ found: true, target });
   } else {
     res.json({ found: false });
   }
