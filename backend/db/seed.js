@@ -3,6 +3,10 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
+  await prisma.gameSession.deleteMany();
+  await prisma.target.deleteMany();
+  await prisma.image.deleteMany();
+
   const waldo2 = await prisma.image.create({
     data: {
       name: 'waldo2.jpg',

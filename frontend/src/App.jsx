@@ -1,12 +1,9 @@
 import { useEffect, useState } from 'react';
-import Image from './components/Game';
 import './App.css';
 import axios from 'axios';
-import Marker from './components/Marker';
-import Game from './components/Game';
+import { Link } from 'react-router';
 
 function App() {
-  // Maybe fetch images?
   const [images, setImages] = useState([]);
 
   useEffect(() => {
@@ -17,7 +14,6 @@ function App() {
         setImages(response.data.images);
       }
     }
-
     fetchImages();
   }, []);
 
@@ -28,7 +24,9 @@ function App() {
   return (
     <>
       {images.map((image) => (
-        <Game key={image.id} image={image} />
+        <div key={image.id}>
+          <Link to={`/game/${image.id}`}>Game</Link>
+        </div>
       ))}
     </>
   );

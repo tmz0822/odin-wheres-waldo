@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "GameSession" ALTER COLUMN "time" DROP NOT NULL,
+ALTER COLUMN "username" DROP NOT NULL,
+ALTER COLUMN "found" SET DEFAULT 0;

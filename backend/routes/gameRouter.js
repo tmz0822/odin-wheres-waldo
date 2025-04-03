@@ -6,8 +6,11 @@ const gameRouter = Router();
 
 const gameController = require('../controllers/gameController');
 
-gameRouter.post('/:imageId/start', gameController.startGameSession);
-gameRouter.put('/:sessionId/end', gameController.endGameSession);
+gameRouter.get('/:imageId', gameController.getHighScores);
+
+gameRouter.post('/:imageId/create', gameController.createGameSession);
+
 gameRouter.put('/:sessionId/found', gameController.updateTargetFound);
+gameRouter.put('/:sessionId/end', gameController.endGameSession);
 
 module.exports = gameRouter;

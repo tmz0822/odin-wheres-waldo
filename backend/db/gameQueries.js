@@ -20,40 +20,68 @@ async function createGameSession(imageId) {
 
 async function updateTargetFound(sessionId) {
   try {
-    const session = await prisma.gameSession.findUnique({
+    const gameSession = await prisma.gameSession.findUnique({
       where: {
         id: Number(sessionId),
       },
     });
 
-    const updatedSession = await prisma.gameSession.update({
-      data: {
-        found: session.found + 1,
+    const updatedGameSession = await prisma.gameSession.update({
+      where: {
+        id: Number(sessionId),
       },
-      where: { id: Number(sessionId) },
+      data: {
+        found: gameSession.found + 1,
+      },
     });
 
-    return updatedSession;
+    return updatedGameSession;
   } catch (error) {
     console.error(error);
   }
 }
 
-async function endGameSession(sessionId) {
+async function endGameSession(sessionId, data) {
   try {
-    const updatedSession = await prisma.gameSession.update({
-      data: {
-        endTime: new Date(),
-      },
+    const updatedGameSession = await prisma.gameSession.update({
       where: {
         id: Number(sessionId),
       },
+      data: {
+        username: data.username ? data.username : null,
+        timeSpent: data.time,
+      },
     });
 
-    return updatedSession;
+    return updatedGameSession;
   } catch (error) {
     console.error(error);
   }
 }
 
-module.exports = { createGameSession, updateTargetFound, endGameSession };
+async function getHighScores(imageId, limit = 10) {
+  try {
+    const highScores = await prisma.gameSession.findMany({
+      where: {
+        imageId: Number(imageId),
+        username: { not: null },
+        timeSpent: { not: null },
+      },
+      take: limit,
+      orderBy: {
+        timeSpent: 'asc',
+      },
+    });
+
+    return highScores;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+module.exports = {
+  createGameSession,
+  updateTargetFound,
+  endGameSession,
+  getHighScores,
+};

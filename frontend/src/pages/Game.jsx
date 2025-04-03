@@ -1,77 +1,51 @@
 import { useEffect, useState } from 'react';
 import imageUrl from '../images/waldo2.jpg';
-import ClickBox from './ClickBox';
-import DropdownMenu from './DropdownMenu';
-import Marker from './Marker';
+import ClickBox from '../components/ClickBox';
+import DropdownMenu from '../components/DropdownMenu';
+import Marker from '../components/Marker';
 import axios from 'axios';
+import { formatTime } from '../../utils/date';
+import { useParams } from 'react-router';
 
 // When this element shows
 // Start the 'game session' and timer.
-const Game = ({ image }) => {
+const Game = () => {
+  const { imageId } = useParams();
+  const [image, setImage] = useState(null);
+
   const [coordinates, setCoordinates] = useState({ x: 0, y: 0 });
   const [clickBoxIsVisible, setClickBoxIsVisible] = useState(false);
   const [menuIsVisible, setMenuIsVisible] = useState(false);
   const [markers, setMarkers] = useState([]);
-
   const [gameSession, setGameSession] = useState(null);
+
   const [time, setTime] = useState(0);
-  const [isRunning, setIsRunning] = useState(true);
+  const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
-    // Start a game session
-    async function startGameSession() {
-      console.log(gameSession);
-      if (gameSession) return;
+    // fetch image
+    fetchImage(imageId);
 
-      const response = await axios.post(
-        `http://localhost:3000/game/${image.id}/start`
-      );
+    let interval;
 
-      if (response.data.success) {
-        setGameSession(response.data.gameSession);
-      }
+    if (isRunning) {
+      interval = setInterval(() => {
+        setTime((prevTime) => prevTime + 10); // Increase time every 10ms
+      }, 10);
+    } else {
+      clearInterval(interval);
     }
-
-    startGameSession();
-
-    // Check if game finishes
-    if (gameSession !== null && gameSession.found === image.targets.length) {
-      console.log('ending game');
-      endGameSession();
-    }
-
-    async function endGameSession() {
-      const response = await axios.put(
-        `http://localhost:3000/game/${gameSession.id}/end`
-      );
-      console.log(response);
-      if (response.data.success) {
-        // setGameSession(response.data.updatedSession);
-        setIsRunning(false);
-        setGameSession(null);
-      }
-    }
-
-    const interval = setInterval(() => {
-      if (isRunning) {
-        setTime((prevTime) => prevTime + 10);
-      }
-    }, 10);
 
     return () => clearInterval(interval);
-  }, [isRunning, gameSession, image.id, image.targets.length]);
+  }, [isRunning]);
 
-  // Convert time (in milliseconds) to MM:SS:MS format
-  const formatTime = (timeInMillis) => {
-    const minutes = Math.floor(timeInMillis / 60000); // 60,000 ms = 1 minute
-    const seconds = Math.floor((timeInMillis % 60000) / 1000); // Remainder after minutes, in seconds
-    const milliseconds = timeInMillis % 1000; // Remainder in milliseconds
-
-    // Pad with leading zeros if necessary (e.g., "05" instead of "5")
-    return `${minutes.toString().padStart(2, '0')}:${seconds
-      .toString()
-      .padStart(2, '0')}:${milliseconds.toString().padStart(3, '0')}`;
-  };
+  async function fetchImage(imageId) {
+    const response = await axios.get(`http://localhost:3000/images/${imageId}`);
+    console.log(response);
+    if (response.data.success) {
+      setImage(response.data.image);
+    }
+  }
 
   function handleMouseDown(e) {
     updateCoordinates(e);
@@ -103,14 +77,55 @@ const Game = ({ image }) => {
     const response = await axios.put(
       `http://localhost:3000/game/${gameSession.id}/found`
     );
-
     if (response.data.success) {
-      setGameSession(response.data.updatedSession);
+      const updatedGameSession = response.data.gameSession;
+      if (updatedGameSession.found === image.targets.length) {
+        console.log('ending game session');
+        endGameSession({ time });
+        setGameSession(null);
+        setIsRunning(false);
+      } else {
+        setGameSession(response.data.gameSession);
+      }
     }
+  }
+
+  function startGame() {
+    resetGame();
+    createGameSession();
+  }
+
+  function resetGame() {
+    setTime(0);
+    setIsRunning(true);
+    setMarkers([]);
+  }
+
+  async function createGameSession() {
+    const response = await axios.post(
+      `http://localhost:3000/game/${image.id}/create`
+    );
+    if (response.data.success) {
+      setGameSession(response.data.gameSession);
+    }
+  }
+
+  async function endGameSession() {
+    const response = await axios.put(
+      `http://localhost:3000/game/${gameSession.id}/end`,
+      { time }
+    );
+  }
+
+  if (!image) {
+    return <div>Loading...</div>;
   }
 
   return (
     <>
+      <button onClick={startGame} disabled={gameSession !== null}>
+        Start Game
+      </button>
       <h1>{image.name}</h1>
       <h2>Time: {formatTime(time)}</h2>
       <div className="image-container">
@@ -120,6 +135,9 @@ const Game = ({ image }) => {
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           draggable="false"
+          style={{
+            pointerEvents: isRunning ? 'auto' : 'none',
+          }}
         />
 
         {clickBoxIsVisible && (

@@ -2,7 +2,6 @@ import axios from 'axios';
 import firstImage from '../images/waldo2_1.jpg';
 import secondImage from '../images/waldo2_2.jpg';
 import thirdImage from '../images/waldo2_3.jpg';
-import Marker from './Marker';
 
 const DropdownMenu = ({
   x,

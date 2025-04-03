@@ -1,6 +1,6 @@
 const gameQueries = require('../db/gameQueries');
 
-async function startGameSession(req, res) {
+async function createGameSession(req, res) {
   try {
     const imageId = req.params.imageId;
 
@@ -16,12 +16,11 @@ async function startGameSession(req, res) {
 async function updateTargetFound(req, res) {
   try {
     const sessionId = req.params.sessionId;
+    const gameSession = await gameQueries.updateTargetFound(sessionId);
 
-    const updatedSession = await gameQueries.updateTargetFound(sessionId);
-
-    return res.json({ success: true, updatedSession });
+    return res.json({ success: true, gameSession });
   } catch (error) {
-    console.log('Failed to update target found: ', error);
+    console.log('Failed to start game session: ', error);
     return res.json({ success: false, error });
   }
 }
@@ -29,14 +28,31 @@ async function updateTargetFound(req, res) {
 async function endGameSession(req, res) {
   try {
     const sessionId = req.params.sessionId;
+    const data = req.body;
+    const gameSession = await gameQueries.endGameSession(sessionId, data);
 
-    const updatedSession = await gameQueries.endGameSession(sessionId);
-
-    return res.json({ success: true, updatedSession });
+    return res.json({ success: true, gameSession });
   } catch (error) {
-    console.log('Failed to end game session: ', error);
+    console.log('Failed to start game session: ', error);
     return res.json({ success: false, error });
   }
 }
 
-module.exports = { startGameSession, updateTargetFound, endGameSession };
+async function getHighScores(req, res) {
+  try {
+    const imageId = req.params.imageId;
+    const highScores = await gameQueries.getHighScores(imageId);
+
+    return res.json({ success: true, highScores });
+  } catch (error) {
+    console.log('Failed to get high scores: ', error);
+    return res.json({ success: false, error });
+  }
+}
+
+module.exports = {
+  createGameSession,
+  updateTargetFound,
+  endGameSession,
+  getHighScores,
+};
