@@ -4,7 +4,6 @@ import { useParams } from 'react-router';
 
 const Leaderboard = () => {
   const { imageId } = useParams();
-
   const [highScores, setHighScores] = useState([]);
 
   useEffect(() => {

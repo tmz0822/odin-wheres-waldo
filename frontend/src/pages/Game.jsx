@@ -5,10 +5,8 @@ import DropdownMenu from '../components/DropdownMenu';
 import Marker from '../components/Marker';
 import axios from 'axios';
 import { formatTime } from '../../utils/date';
-import { useParams } from 'react-router';
+import { Link, useParams } from 'react-router';
 
-// When this element shows
-// Start the 'game session' and timer.
 const Game = () => {
   const { imageId } = useParams();
   const [image, setImage] = useState(null);
@@ -21,6 +19,8 @@ const Game = () => {
 
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+
+  const [highScores, setHighScores] = useState([]);
 
   useEffect(() => {
     // fetch image
@@ -37,7 +37,19 @@ const Game = () => {
     }
 
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isRunning, imageId]);
+
+  useEffect(() => {
+    async function fetchHighScores() {
+      const response = await axios.get(`http://localhost:3000/game/${imageId}`);
+
+      if (response.data.success) {
+        setHighScores(response.data.highScores);
+      }
+    }
+
+    fetchHighScores();
+  }, [imageId]);
 
   async function fetchImage(imageId) {
     const response = await axios.get(`http://localhost:3000/images/${imageId}`);
@@ -111,10 +123,23 @@ const Game = () => {
   }
 
   async function endGameSession() {
-    const response = await axios.put(
-      `http://localhost:3000/game/${gameSession.id}/end`,
-      { time }
+    // Compare the time with the current high scores
+    const newHighScore = highScores.find(
+      (highScore) => highScore.timeSpent > time
     );
+    if (newHighScore) {
+      const username = prompt(
+        'You have made a new high score! Enter your username if you want to show it in the leaderboard!'
+      );
+      await axios.put(`http://localhost:3000/game/${gameSession.id}/end`, {
+        time,
+        username,
+      });
+    } else {
+      await axios.put(`http://localhost:3000/game/${gameSession.id}/end`, {
+        time,
+      });
+    }
   }
 
   if (!image) {
@@ -123,6 +148,7 @@ const Game = () => {
 
   return (
     <>
+      <Link to="leaderboard">Leaderboard</Link>
       <button onClick={startGame} disabled={gameSession !== null}>
         Start Game
       </button>
